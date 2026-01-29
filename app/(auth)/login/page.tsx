@@ -3,7 +3,7 @@
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { login } from '@/lib/auth';
-import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Loader2, Play } from 'lucide-react';
 import JamboLogo from '@/components/JamboLogo';
 
 export default function LoginPage() {
@@ -14,6 +14,24 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [demoLoading, setDemoLoading] = useState(false);
+
+  // Demo mode - bypass login for product demos
+  const handleDemoMode = () => {
+    setDemoLoading(true);
+    // Set demo auth data in localStorage
+    localStorage.setItem('authToken', 'demo-token-for-presentation');
+    localStorage.setItem('operator', JSON.stringify({
+      id: 'demo-operator',
+      companyName: 'Nile Star Coaches',
+      email: 'demo@nilestarcoaches.com',
+      fullName: 'Demo User',
+      role: 'admin',
+    }));
+    localStorage.setItem('demoMode', 'true');
+    // Redirect to dashboard
+    router.push('/dashboard');
+  };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -165,9 +183,39 @@ export default function LoginPage() {
               )}
             </button>
 
+            {/* Divider */}
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-200"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-4 bg-white text-gray-400">or</span>
+              </div>
+            </div>
+
+            {/* Demo Mode Button */}
+            <button
+              type="button"
+              onClick={handleDemoMode}
+              disabled={demoLoading || loading}
+              className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
+            >
+              {demoLoading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Entering Demo...
+                </>
+              ) : (
+                <>
+                  <Play className="w-5 h-5" />
+                  Enter Demo Mode
+                </>
+              )}
+            </button>
+
             {/* Bottom Text */}
             <p className="text-center text-xs text-gray-400 mt-6">
-              Having trouble logging in? Contact your administrator
+              Use Demo Mode to explore the dashboard without credentials
             </p>
           </form>
         </div>

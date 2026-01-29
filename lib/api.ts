@@ -58,8 +58,8 @@ api.interceptors.response.use(
     }
 
     if (error.response?.status === 401) {
-      // Unauthorized - clear auth and redirect to login
-      if (typeof window !== 'undefined') {
+      // Unauthorized - clear auth and redirect to login (unless in demo mode)
+      if (typeof window !== 'undefined' && localStorage.getItem('demoMode') !== 'true') {
         localStorage.removeItem('authToken');
         localStorage.removeItem('operator');
         window.location.href = '/login';
