@@ -784,7 +784,7 @@ export default function FinancePage() {
                     borderRadius: '12px',
                     boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
                   }}
-                  formatter={(value: number) => [formatFullCurrency(value), 'Revenue']}
+                  formatter={(value) => [formatFullCurrency(value as number), 'Revenue']}
                 />
                 <Area
                   type="monotone"
@@ -839,7 +839,7 @@ export default function FinancePage() {
                       borderRadius: '12px',
                       boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
                     }}
-                    formatter={(value: number) => [formatFullCurrency(value), 'Revenue']}
+                    formatter={(value) => [formatFullCurrency(value as number), 'Revenue']}
                   />
                 </PieChart>
               </ResponsiveContainer>

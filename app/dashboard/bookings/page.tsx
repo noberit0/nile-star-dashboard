@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
   RefreshCw,
@@ -75,7 +75,7 @@ interface Filters {
   routeId: string;
 }
 
-export default function BookingsPage() {
+function BookingsContent() {
   const searchParams = useSearchParams();
   const initialSearch = searchParams.get('search') || '';
 
@@ -865,5 +865,13 @@ export default function BookingsPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function BookingsPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50/30 flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8a6ae8]"></div></div>}>
+      <BookingsContent />
+    </Suspense>
   );
 }
