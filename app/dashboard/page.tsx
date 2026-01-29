@@ -55,7 +55,7 @@ export default function DashboardPage() {
         passengerName: 'John Mukasa',
         passengerPhone: '+256700111222',
         route: { name: 'Kampala - Arua', origin: 'Kampala', destination: 'Arua' },
-        schedule: { departureTime: '07:15', travelDate: new Date().toISOString() },
+        schedule: { departureTime: '07:15', travelDate: new Date() },
         seatNumbers: [12, 13],
         totalPrice: 85000,
         paymentStatus: 'completed',
@@ -69,7 +69,7 @@ export default function DashboardPage() {
         passengerName: 'Sarah Nambi',
         passengerPhone: '+256701222333',
         route: { name: 'Arua - Kampala', origin: 'Arua', destination: 'Kampala' },
-        schedule: { departureTime: '08:30', travelDate: new Date().toISOString() },
+        schedule: { departureTime: '08:30', travelDate: new Date() },
         seatNumbers: [5],
         totalPrice: 45000,
         paymentStatus: 'completed',
@@ -83,7 +83,7 @@ export default function DashboardPage() {
         passengerName: 'Peter Okello',
         passengerPhone: '+256702333444',
         route: { name: 'Kampala - Arua', origin: 'Kampala', destination: 'Arua' },
-        schedule: { departureTime: '11:00', travelDate: new Date().toISOString() },
+        schedule: { departureTime: '11:00', travelDate: new Date() },
         seatNumbers: [8, 9, 10],
         totalPrice: 135000,
         paymentStatus: 'completed',
@@ -98,16 +98,22 @@ export default function DashboardPage() {
     hasRoutes: true,
     hasBuses: true,
     hasSchedules: true,
-    isComplete: true,
+    setupComplete: true,
+    routesCount: 2,
+    schedulesCount: 10,
+    busesCount: 10,
   };
 
   const DEMO_TODAYS_TRIPS: TodaysTripsData = {
-    totalTrips: 10,
-    completedTrips: 4,
-    inProgressTrips: 2,
-    upcomingTrips: 4,
-    totalPassengers: 312,
-    totalRevenue: 4850000,
+    trips: [],
+    summary: {
+      totalTrips: 10,
+      totalCapacity: 500,
+      totalBooked: 312,
+      totalAvailable: 188,
+      overallOccupancy: 62.4,
+      fullTrips: 2,
+    },
   };
 
   const fetchDashboardData = async (isRefresh = false) => {
