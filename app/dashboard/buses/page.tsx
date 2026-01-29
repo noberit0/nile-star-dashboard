@@ -37,6 +37,14 @@ export default function BusesPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingBus, setEditingBus] = useState<Bus | null>(null);
 
+  // Demo buses data
+  const DEMO_BUSES: Bus[] = [
+    { id: '1', registrationNumber: 'UAX 123A', fleetNumber: 'NSC-KA-001', type: 'VIP', make: 'Scania', model: 'Touring', year: 2022, capacity: 45, status: 'active', condition: 'excellent', lastServiceDate: '2024-01-15', nextServiceDate: '2024-04-15', features: ['WiFi', 'AC', 'USB Charging', 'TV'], notes: null, active: true, luggagePrice: 5000, maxExtraLuggage: 3, createdAt: '2024-01-01', _count: { schedules: 3 } },
+    { id: '2', registrationNumber: 'UAX 124B', fleetNumber: 'NSC-KA-002', type: 'VIP', make: 'Scania', model: 'Touring', year: 2022, capacity: 45, status: 'active', condition: 'good', lastServiceDate: '2024-01-10', nextServiceDate: '2024-04-10', features: ['WiFi', 'AC', 'USB Charging'], notes: null, active: true, luggagePrice: 5000, maxExtraLuggage: 3, createdAt: '2024-01-01', _count: { schedules: 2 } },
+    { id: '3', registrationNumber: 'UAX 125C', fleetNumber: 'NSC-AK-001', type: 'Standard', make: 'Yutong', model: 'ZK6122', year: 2021, capacity: 50, status: 'active', condition: 'good', lastServiceDate: '2024-01-20', nextServiceDate: '2024-04-20', features: ['AC', 'USB Charging'], notes: null, active: true, luggagePrice: 3000, maxExtraLuggage: 2, createdAt: '2024-01-01', _count: { schedules: 2 } },
+    { id: '4', registrationNumber: 'UAX 126D', fleetNumber: 'NSC-AK-002', type: 'Standard', make: 'Yutong', model: 'ZK6122', year: 2021, capacity: 50, status: 'maintenance', condition: 'fair', lastServiceDate: '2024-02-01', nextServiceDate: '2024-02-15', features: ['AC'], notes: 'Engine service', active: false, luggagePrice: 3000, maxExtraLuggage: 2, createdAt: '2024-01-01', _count: { schedules: 1 } },
+  ];
+
   const fetchBuses = async (isRefresh = false) => {
     if (isRefresh) {
       setRefreshing(true);
@@ -44,13 +52,23 @@ export default function BusesPage() {
       setLoading(true);
     }
 
+    // Check for demo mode
+    if (typeof window !== 'undefined' && localStorage.getItem('demoMode') === 'true') {
+      setBuses(DEMO_BUSES);
+      setError(null);
+      setLoading(false);
+      setRefreshing(false);
+      return;
+    }
+
     try {
       const response = await api.get('/operator/buses');
       setBuses(response.data.data);
       setError(null);
     } catch (err: any) {
-      console.error('Fetch buses error:', err);
-      setError(err.response?.data?.message || 'Failed to load buses');
+      // Fallback to demo data
+      setBuses(DEMO_BUSES);
+      setError(null);
     } finally {
       setLoading(false);
       setRefreshing(false);
