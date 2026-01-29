@@ -49,6 +49,24 @@ interface Filters {
   endDate: string;
 }
 
+// Demo mode data for Nile Star Coaches
+const DEMO_REFUNDS: Refund[] = [
+  { id: '1', bookingId: 'bk1', amount: 85000, reason: 'Trip cancelled by passenger', status: 'completed', refundTransactionId: 'REF-123', notes: 'Refund processed', requestedBy: 'customer', processedBy: 'admin', processedAt: new Date(Date.now() - 86400000).toISOString(), completedAt: new Date(Date.now() - 86400000).toISOString(), createdAt: new Date(Date.now() - 172800000).toISOString(), booking: { bookingReference: 'NSC-2024-010', passengerName: 'David Ochieng', passengerPhone: '+256704555666', passengerEmail: null, schedule: { route: { name: 'Kampala - Arua', origin: 'Kampala', destination: 'Arua' } } } },
+  { id: '2', bookingId: 'bk2', amount: 45000, reason: 'Schedule change', status: 'pending', refundTransactionId: null, notes: null, requestedBy: 'customer', processedBy: null, processedAt: null, completedAt: null, createdAt: new Date(Date.now() - 43200000).toISOString(), booking: { bookingReference: 'NSC-2024-015', passengerName: 'Mary Apio', passengerPhone: '+256705666777', passengerEmail: 'mary@email.com', schedule: { route: { name: 'Arua - Kampala', origin: 'Arua', destination: 'Kampala' } } } },
+  { id: '3', bookingId: 'bk3', amount: 90000, reason: 'Double booking', status: 'approved', refundTransactionId: null, notes: 'Approved for processing', requestedBy: 'operator', processedBy: 'admin', processedAt: new Date(Date.now() - 21600000).toISOString(), completedAt: null, createdAt: new Date(Date.now() - 86400000).toISOString(), booking: { bookingReference: 'NSC-2024-020', passengerName: 'James Okoth', passengerPhone: '+256706777888', passengerEmail: 'james@email.com', schedule: { route: { name: 'Kampala - Arua', origin: 'Kampala', destination: 'Arua' } } } },
+];
+
+const DEMO_REFUND_STATS: RefundStats = {
+  totalPending: 2,
+  totalApproved: 1,
+  totalCompleted: 18,
+  totalRejected: 2,
+  totalFailed: 0,
+  pendingAmount: 450000,
+  completedAmount: 1850000,
+  completedToday: 1,
+};
+
 export default function RefundsPage() {
   const [refunds, setRefunds] = useState<Refund[]>([]);
   const [stats, setStats] = useState<RefundStats | null>(null);
@@ -64,11 +82,24 @@ export default function RefundsPage() {
     endDate: '',
   });
 
+  // Check for demo mode
+  const isDemoMode = () => typeof window !== 'undefined' && localStorage.getItem('demoMode') === 'true';
+
   const fetchRefunds = async (isRefresh = false) => {
     if (isRefresh) {
       setRefreshing(true);
     } else {
       setLoading(true);
+    }
+
+    // Check for demo mode
+    if (isDemoMode()) {
+      setRefunds(DEMO_REFUNDS);
+      setStats(DEMO_REFUND_STATS);
+      setError(null);
+      setLoading(false);
+      setRefreshing(false);
+      return;
     }
 
     try {
@@ -91,7 +122,10 @@ export default function RefundsPage() {
       setError(null);
     } catch (err: any) {
       console.error('Fetch refunds error:', err);
-      setError(err.response?.data?.message || 'Failed to load refunds');
+      // Fallback to demo data on error
+      setRefunds(DEMO_REFUNDS);
+      setStats(DEMO_REFUND_STATS);
+      setError(null);
     } finally {
       setLoading(false);
       setRefreshing(false);

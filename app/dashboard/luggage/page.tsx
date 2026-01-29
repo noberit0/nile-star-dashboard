@@ -16,6 +16,20 @@ interface Bus {
   status: string;
 }
 
+// Demo data for Nile Star Coaches fleet
+const DEMO_BUSES: Bus[] = [
+  { id: '1', registrationNumber: 'UAX 123A', fleetNumber: 'NSC-KA-001', type: 'VIP', make: 'Scania', model: 'Touring', luggagePrice: 15000, maxExtraLuggage: 3, status: 'active' },
+  { id: '2', registrationNumber: 'UAX 456B', fleetNumber: 'NSC-KA-002', type: 'VIP', make: 'Scania', model: 'Touring', luggagePrice: 15000, maxExtraLuggage: 3, status: 'active' },
+  { id: '3', registrationNumber: 'UAX 789C', fleetNumber: 'NSC-KA-003', type: 'Business', make: 'Mercedes-Benz', model: 'Tourismo', luggagePrice: 12000, maxExtraLuggage: 4, status: 'active' },
+  { id: '4', registrationNumber: 'UAX 012D', fleetNumber: 'NSC-KA-004', type: 'Business', make: 'Mercedes-Benz', model: 'Tourismo', luggagePrice: 12000, maxExtraLuggage: 4, status: 'maintenance' },
+  { id: '5', registrationNumber: 'UAY 345E', fleetNumber: 'NSC-AK-001', type: 'VIP', make: 'Scania', model: 'Touring', luggagePrice: 15000, maxExtraLuggage: 3, status: 'active' },
+  { id: '6', registrationNumber: 'UAY 678F', fleetNumber: 'NSC-AK-002', type: 'VIP', make: 'Scania', model: 'Touring', luggagePrice: 15000, maxExtraLuggage: 3, status: 'active' },
+  { id: '7', registrationNumber: 'UAY 901G', fleetNumber: 'NSC-AK-003', type: 'Standard', make: 'Yutong', model: 'ZK6122H9', luggagePrice: 10000, maxExtraLuggage: 5, status: 'active' },
+  { id: '8', registrationNumber: 'UAY 234H', fleetNumber: 'NSC-AK-004', type: 'Standard', make: 'Yutong', model: 'ZK6122H9', luggagePrice: 10000, maxExtraLuggage: 5, status: 'active' },
+];
+
+const isDemoMode = () => typeof window !== 'undefined' && localStorage.getItem('demoMode') === 'true';
+
 export default function LuggagePage() {
   const [buses, setBuses] = useState<Bus[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,6 +47,15 @@ export default function LuggagePage() {
       setLoading(true);
     }
 
+    // Check for demo mode
+    if (isDemoMode()) {
+      setBuses(DEMO_BUSES);
+      setError(null);
+      setLoading(false);
+      setRefreshing(false);
+      return;
+    }
+
     try {
       // Get operator ID from localStorage
       const operatorId = localStorage.getItem('operatorId') || 'default-operator-id';
@@ -41,7 +64,13 @@ export default function LuggagePage() {
       setError(null);
     } catch (err: any) {
       console.error('Fetch buses luggage error:', err);
-      setError(err.response?.data?.message || 'Failed to load buses');
+      // Fallback to demo data on error
+      if (isDemoMode()) {
+        setBuses(DEMO_BUSES);
+        setError(null);
+      } else {
+        setError(err.response?.data?.message || 'Failed to load buses');
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);

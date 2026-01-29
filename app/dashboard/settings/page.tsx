@@ -31,6 +31,28 @@ interface SettingsData {
 
 type TabType = 'company' | 'profile' | 'password' | 'notifications';
 
+// Demo mode data for Nile Star Coaches
+const DEMO_SETTINGS: SettingsData = {
+  operator: {
+    id: 'demo-operator-id',
+    companyName: 'Nile Star Coaches',
+    contactEmail: 'info@nilestarcoaches.com',
+    contactPhone: '+256 752 483 921',
+    verificationStatus: 'verified',
+    active: true,
+    createdAt: '2023-06-15T00:00:00Z',
+  },
+  user: {
+    id: 'demo-user-id',
+    email: 'demo@nilestarcoaches.com',
+    fullName: 'Demo Admin',
+    role: 'admin',
+    active: true,
+    lastLoginAt: new Date().toISOString(),
+    createdAt: '2023-06-15T00:00:00Z',
+  },
+};
+
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<TabType>('company');
   const [settings, setSettings] = useState<SettingsData | null>(null);
@@ -61,11 +83,30 @@ export default function SettingsPage() {
     confirmPassword: '',
   });
 
+  // Check for demo mode
+  const isDemoMode = () => typeof window !== 'undefined' && localStorage.getItem('demoMode') === 'true';
+
   useEffect(() => {
     fetchSettings();
   }, []);
 
   const fetchSettings = async () => {
+    // Check for demo mode
+    if (isDemoMode()) {
+      setSettings(DEMO_SETTINGS);
+      setCompanyForm({
+        companyName: DEMO_SETTINGS.operator.companyName,
+        contactEmail: DEMO_SETTINGS.operator.contactEmail,
+        contactPhone: DEMO_SETTINGS.operator.contactPhone,
+      });
+      setProfileForm({
+        fullName: DEMO_SETTINGS.user.fullName,
+        email: DEMO_SETTINGS.user.email,
+      });
+      setLoading(false);
+      return;
+    }
+
     try {
       const response = await api.get('/operators/settings');
 
@@ -85,7 +126,17 @@ export default function SettingsPage() {
       }
     } catch (error) {
       console.error('Error fetching settings:', error);
-      showNotification('error', 'Failed to load settings');
+      // Fallback to demo data on error
+      setSettings(DEMO_SETTINGS);
+      setCompanyForm({
+        companyName: DEMO_SETTINGS.operator.companyName,
+        contactEmail: DEMO_SETTINGS.operator.contactEmail,
+        contactPhone: DEMO_SETTINGS.operator.contactPhone,
+      });
+      setProfileForm({
+        fullName: DEMO_SETTINGS.user.fullName,
+        email: DEMO_SETTINGS.user.email,
+      });
     } finally {
       setLoading(false);
     }

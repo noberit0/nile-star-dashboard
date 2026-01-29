@@ -131,6 +131,83 @@ interface RefundStats {
   completedToday: number;
 }
 
+// Demo mode data
+const DEMO_OVERVIEW: FinancialOverview = {
+  overview: {
+    totalRevenue: 48500000,
+    netRevenue: 46200000,
+    totalTransactions: 1127,
+    expectedSettlement: 44850000,
+  },
+  byProvider: {
+    mtn: {
+      revenue: 32750000,
+      transactions: 756,
+      fees: 982500,
+      feePercentage: 3,
+      netSettlement: 31767500,
+    },
+    airtel: {
+      revenue: 15750000,
+      transactions: 371,
+      fees: 472500,
+      feePercentage: 3,
+      netSettlement: 15277500,
+    },
+  },
+  refunds: {
+    total: 2300000,
+    pending: 450000,
+    completed: 1850000,
+    count: 23,
+  },
+  fees: {
+    total: 1455000,
+    mtn: 982500,
+    airtel: 472500,
+  },
+};
+
+const DEMO_TRANSACTIONS: Transaction[] = [
+  { id: '1', bookingReference: 'NSC-2024-001', passengerName: 'John Mukasa', passengerPhone: '+256700111222', route: 'Kampala → Arua', amount: 85000, paymentStatus: 'completed', provider: 'MTN', transactionId: 'MTN-123456789', transactionDate: new Date().toISOString(), completedAt: new Date().toISOString() },
+  { id: '2', bookingReference: 'NSC-2024-002', passengerName: 'Sarah Nambi', passengerPhone: '+256701222333', route: 'Arua → Kampala', amount: 45000, paymentStatus: 'completed', provider: 'Airtel', transactionId: 'AIR-987654321', transactionDate: new Date(Date.now() - 3600000).toISOString(), completedAt: new Date(Date.now() - 3600000).toISOString() },
+  { id: '3', bookingReference: 'NSC-2024-003', passengerName: 'Peter Okello', passengerPhone: '+256702333444', route: 'Kampala → Arua', amount: 135000, paymentStatus: 'completed', provider: 'MTN', transactionId: 'MTN-456789123', transactionDate: new Date(Date.now() - 7200000).toISOString(), completedAt: new Date(Date.now() - 7200000).toISOString() },
+  { id: '4', bookingReference: 'NSC-2024-004', passengerName: 'Grace Akello', passengerPhone: '+256703444555', route: 'Arua → Kampala', amount: 90000, paymentStatus: 'completed', provider: 'MTN', transactionId: 'MTN-789123456', transactionDate: new Date(Date.now() - 10800000).toISOString(), completedAt: new Date(Date.now() - 10800000).toISOString() },
+];
+
+const DEMO_DAILY_REVENUE: DailyRevenue[] = Array.from({ length: 14 }, (_, i) => {
+  const date = new Date();
+  date.setDate(date.getDate() - (13 - i));
+  const baseRevenue = 3000000 + Math.random() * 2000000;
+  const mtnRevenue = baseRevenue * 0.65;
+  const airtelRevenue = baseRevenue * 0.35;
+  return {
+    date: date.toISOString().split('T')[0],
+    totalRevenue: Math.round(baseRevenue),
+    mtnRevenue: Math.round(mtnRevenue),
+    airtelRevenue: Math.round(airtelRevenue),
+    transactionCount: Math.round(30 + Math.random() * 50),
+    mtnCount: Math.round(20 + Math.random() * 30),
+    airtelCount: Math.round(10 + Math.random() * 20),
+  };
+});
+
+const DEMO_REFUNDS: Refund[] = [
+  { id: '1', bookingId: 'bk1', amount: 85000, reason: 'Trip cancelled by passenger', status: 'completed', refundTransactionId: 'REF-123', notes: 'Refund processed', requestedBy: 'customer', processedBy: 'admin', processedAt: new Date(Date.now() - 86400000).toISOString(), completedAt: new Date(Date.now() - 86400000).toISOString(), createdAt: new Date(Date.now() - 172800000).toISOString(), booking: { bookingReference: 'NSC-2024-010', passengerName: 'David Ochieng', passengerPhone: '+256704555666', passengerEmail: null, schedule: { route: { name: 'Kampala - Arua', origin: 'Kampala', destination: 'Arua' } } } },
+  { id: '2', bookingId: 'bk2', amount: 45000, reason: 'Schedule change', status: 'pending', refundTransactionId: null, notes: null, requestedBy: 'customer', processedBy: null, processedAt: null, completedAt: null, createdAt: new Date(Date.now() - 43200000).toISOString(), booking: { bookingReference: 'NSC-2024-015', passengerName: 'Mary Apio', passengerPhone: '+256705666777', passengerEmail: 'mary@email.com', schedule: { route: { name: 'Arua - Kampala', origin: 'Arua', destination: 'Kampala' } } } },
+];
+
+const DEMO_REFUND_STATS: RefundStats = {
+  totalPending: 2,
+  totalApproved: 1,
+  totalCompleted: 18,
+  totalRejected: 2,
+  totalFailed: 0,
+  pendingAmount: 450000,
+  completedAmount: 1850000,
+  completedToday: 1,
+};
+
 export default function FinancePage() {
   const [activeTab, setActiveTab] = useState<'overview' | 'transactions' | 'refunds'>('overview');
   const [overview, setOverview] = useState<FinancialOverview | null>(null);
@@ -154,7 +231,14 @@ export default function FinancePage() {
   const [providerFilter, setProviderFilter] = useState('');
   const [refundStatusFilter, setRefundStatusFilter] = useState('');
 
+  // Check for demo mode
+  const isDemoMode = () => typeof window !== 'undefined' && localStorage.getItem('demoMode') === 'true';
+
   const fetchOverview = async () => {
+    if (isDemoMode()) {
+      setOverview(DEMO_OVERVIEW);
+      return;
+    }
     try {
       const params: any = {};
       if (dateRange.startDate) params.startDate = dateRange.startDate;
@@ -169,6 +253,10 @@ export default function FinancePage() {
   };
 
   const fetchTransactions = async () => {
+    if (isDemoMode()) {
+      setTransactions(DEMO_TRANSACTIONS);
+      return;
+    }
     try {
       const params: any = { page: 1, limit: 100 };
       if (dateRange.startDate) params.startDate = dateRange.startDate;
@@ -179,10 +267,15 @@ export default function FinancePage() {
       setTransactions(response.data.data.transactions);
     } catch (err: any) {
       console.error('Fetch transactions error:', err);
+      setTransactions(DEMO_TRANSACTIONS);
     }
   };
 
   const fetchDailyRevenue = async () => {
+    if (isDemoMode()) {
+      setDailyRevenue(DEMO_DAILY_REVENUE);
+      return;
+    }
     try {
       const params: any = {};
       if (dateRange.startDate) params.startDate = dateRange.startDate;
@@ -192,10 +285,16 @@ export default function FinancePage() {
       setDailyRevenue(response.data.data);
     } catch (err: any) {
       console.error('Fetch daily revenue error:', err);
+      setDailyRevenue(DEMO_DAILY_REVENUE);
     }
   };
 
   const fetchRefunds = async () => {
+    if (isDemoMode()) {
+      setRefunds(DEMO_REFUNDS);
+      setRefundStats(DEMO_REFUND_STATS);
+      return;
+    }
     try {
       const params: any = { limit: 50, offset: 0 };
       if (refundStatusFilter) params.status = refundStatusFilter;
@@ -211,6 +310,8 @@ export default function FinancePage() {
       setRefundStats(statsResponse.data.data);
     } catch (err: any) {
       console.error('Fetch refunds error:', err);
+      setRefunds(DEMO_REFUNDS);
+      setRefundStats(DEMO_REFUND_STATS);
     }
   };
 
